@@ -24,21 +24,41 @@ It also shows real-time analytics using interactive charts.
 review = st.text_area("Enter a customer review:")
 
 if st.button("Analyze Sentiment"):
-
-    polarity = TextBlob(review).sentiment.polarity
-
-    if polarity > 0:
-        st.success("Positive 😊")
-
-    elif polarity < 0:
-        st.error("Negative ☹️")
-
+    if not review.strip():
+        st.warning("Enter a review before analyzing sentiment.")
     else:
-        st.info("Neutral 😐")
+        polarity = TextBlob(review).sentiment.polarity
+
+        if polarity > 0:
+            st.success("Positive 😊")
+        elif polarity < 0:
+            st.error("Negative ☹️")
+        else:
+            st.info("Neutral 😐")
 
 st.header("Dataset Analysis")
 
 data = None
+
+TEXT_COLUMN_CANDIDATES = (
+    "review",
+    "text",
+    "tweet",
+    "full_text",
+    "content",
+    "body",
+    "message",
+    "caption",
+    "comment",
+)
+
+
+def find_text_column(columns):
+    normalized_columns = {str(column).strip().lower(): column for column in columns}
+    for candidate in TEXT_COLUMN_CANDIDATES:
+        if candidate in normalized_columns:
+            return normalized_columns[candidate]
+    return None
 
 uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
@@ -78,19 +98,20 @@ if data is not None:
 
     st.write("Columns in dataset:", data.columns)
 
-    if "review" in data.columns:
-        text_column = "review"
-    elif "text" in data.columns:
-        text_column = "text"
-    elif "Review" in data.columns:
-        text_column = "Review"
-    elif "comment" in data.columns:
-        text_column = "comment"
-    else:
-        st.error("No valid text column found!")
-        st.stop()       
+    text_column = find_text_column(data.columns)
+    if text_column is None:
+        st.error(
+            "No valid text column found. Use review, text, tweet, full_text, "
+            "content, body, message, caption, or comment."
+        )
+        st.stop()
 
-    data["Sentiment"] = data["review"].apply(get_sentiment)
+    text_values = data[text_column].fillna("").astype(str).str.strip()
+    if not text_values.astype(bool).any():
+        st.error("The selected text column is empty.")
+        st.stop()
+
+    data["Sentiment"] = text_values.apply(get_sentiment)
 
     st.write(data)
 

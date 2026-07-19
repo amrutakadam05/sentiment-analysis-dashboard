@@ -105,3 +105,11 @@ Python | Streamlit | Pandas | TextBlob
 🌐 Live Demo: (paste Streamlit link here)
 
 #Python #DataScience #MachineLearning #NLP #Streamlit #AI
+
+---
+
+### Xquik CSV Support
+
+Upload CSV exports from [Xquik](https://xquik.com/) for sentiment analysis. The dashboard automatically detects common post text columns such as `text`, `tweet`, and `full_text`.
+
+Xquik is an independent third-party service. Not affiliated with X Corp. "Twitter" and "X" are trademarks of X Corp.
